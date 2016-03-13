@@ -33,7 +33,7 @@ public class PrimeNumberWithSqrtFunctionCalculator implements PrimeNumberStrateg
 
 	@Override
 	public void writePrimes(int maxRange, OutputStream outputStream) throws IOException {
-		ByteArrayOutputStream baos = IntStream.rangeClosed(2, maxRange).parallel().filter(this::isPrime).sorted().sequential()
+		ByteArrayOutputStream baos = IntStream.rangeClosed(2, maxRange).parallel().filter(this::isPrime).sorted()
 				.collect(ByteArrayOutputStream::new, (s, i) -> {
 					try {
 						if (s.toByteArray().length > 0) {
