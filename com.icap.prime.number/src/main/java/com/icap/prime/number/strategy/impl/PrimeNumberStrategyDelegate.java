@@ -53,7 +53,7 @@ public class PrimeNumberStrategyDelegate implements PrimeNumberStrategy {
 		if (maxRange <= 1000) {
 			return strategies.get(REDUCE);
 		}
-		if (maxRange <= 10000000) {
+		if (maxRange <= 30000000) {
 			return strategies.get(SQRT);
 		}
 		throw new UnsupportedOperationException("strategy not yet supported");

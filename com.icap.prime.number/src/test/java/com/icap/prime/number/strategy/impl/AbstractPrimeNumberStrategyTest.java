@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -41,8 +42,18 @@ public abstract class AbstractPrimeNumberStrategyTest {
 
     @Test
     public void testFindPrimesWithStream20() throws IOException {
+        testWithOutputStream(20, Arrays.asList(2, 3, 5, 7, 11, 13, 17, 19));
+    }
+
+    protected void testWithOutputStream(int maxRange, List<Integer> expected) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        strategy.writePrimes(20, baos);
-        assertEquals(Arrays.asList(2, 3, 5, 7, 11, 13, 17, 19), Arrays.stream(new String(baos.toByteArray()).split(",")).mapToInt(Integer::valueOf).boxed().collect(Collectors.toList()));
+        strategy.writePrimes(maxRange, baos);
+        assertEquals(expected, Arrays.stream(new String(baos.toByteArray()).split(",")).mapToInt(Integer::valueOf).boxed().collect(Collectors.toList()));
+    }
+
+    protected void testWithOutputStreamBySize(int maxRange, long primeCount) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        strategy.writePrimes(maxRange, baos);
+        assertEquals(primeCount, Arrays.stream(new String(baos.toByteArray()).split(",")).mapToInt(Integer::valueOf).boxed().collect(Collectors.toList()).size());
     }
 }
