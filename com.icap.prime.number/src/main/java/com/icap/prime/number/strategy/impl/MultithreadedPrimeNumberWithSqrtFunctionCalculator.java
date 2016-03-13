@@ -6,7 +6,9 @@ package com.icap.prime.number.strategy.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -23,8 +25,9 @@ import com.icap.prime.number.strategy.PrimeNumberStrategy;
  *
  */
 public class MultithreadedPrimeNumberWithSqrtFunctionCalculator extends PrimeNumberWithSqrtFunctionCalculator {
-    private ExecutorService executorService = Executors.newFixedThreadPool(50);
-    private static final int CHUNCK = 10000000;
+    private static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MultithreadedPrimeNumberWithSqrtFunctionCalculator.class);
+    private ExecutorService executorService = Executors.newFixedThreadPool(200);
+    private static final int CHUNCK = 1000000;
 
     private static class ListPrimesRunner implements Callable<List<Integer>> {
         public final PrimeNumberStrategy strategy;
@@ -59,28 +62,46 @@ public class MultithreadedPrimeNumberWithSqrtFunctionCalculator extends PrimeNum
 
         @Override
         public Long call() throws Exception {
-            return IntStream.rangeClosed(startRange, endRange).parallel().filter(strategy::isPrime).count();
+            return IntStream.range(startRange, endRange).parallel().filter(strategy::isPrime).count();
         }
     }
 
-    private static class WritePrimesRunner implements Callable<ByteArrayOutputStream> {
+    private static class WritePrimesRunner implements Callable<String> {
         public final PrimeNumberStrategy strategy;
         public final int startRange;
         public final int endRange;
+        public final OutputStream outputStream;
+        public final ByteArrayOutputStream test;
 
         @SuppressWarnings("unused")
-        public WritePrimesRunner(PrimeNumberStrategy strategy, int startRange, int endrange) {
+        public WritePrimesRunner(PrimeNumberStrategy strategy, int startRange, int endrange, OutputStream outputStream, ByteArrayOutputStream test) {
             this.strategy = strategy;
             this.startRange = startRange;
             this.endRange = endrange;
+            this.outputStream = outputStream;
+            this.test = test;
         }
 
         @Override
-        public ByteArrayOutputStream call() throws Exception {
-            return IntStream.rangeClosed(startRange, endRange).parallel().filter(strategy::isPrime).sorted().collect(ByteArrayOutputStream::new,
-                    PrimeNumberWithSqrtFunctionCalculator.accumulator, PrimeNumberWithSqrtFunctionCalculator.combiner);
+        public String call() throws Exception {
+            IntStream.range(startRange, endRange).parallel().filter(strategy::isPrime).sorted().collect(ByteArrayOutputStream::new, (s, i) -> {
+                try {
+                    synchronized (test) {
+                        if (test.toByteArray().length > 0) {
+                            outputStream.write(("," + String.valueOf(i)).getBytes());
+                        } else {
+                            outputStream.write(String.valueOf(i).getBytes());
+                            test.write("got something out".getBytes());
+                        }
+                        outputStream.flush();
+                    }
+                } catch (Exception e) {
+                    logger.error(String.format("can't write %s to stream", i), e);
+                }
+            }, (s1, s2) -> {
+            });
+            return "ok";
         }
-
     }
 
     @Override
@@ -91,7 +112,8 @@ public class MultithreadedPrimeNumberWithSqrtFunctionCalculator extends PrimeNum
 
         try {
             List<Integer> results = new ArrayList<>();
-            results.addAll(invokeAll(createCallables(maxRange, ListPrimesRunner.class)).collect(HashSet::new, HashSet::addAll, HashSet::addAll));
+            results.addAll(invokeAll(createCallables(maxRange, ListPrimesRunner.class.getConstructor(PrimeNumberStrategy.class, int.class, int.class)))
+                    .collect(HashSet::new, HashSet::addAll, HashSet::addAll));
             return results;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -104,7 +126,8 @@ public class MultithreadedPrimeNumberWithSqrtFunctionCalculator extends PrimeNum
             return super.countPrime(maxRange);
         }
         try {
-            return invokeAll(createCallables(maxRange, CountPrimesRunner.class)).collect(Collectors.summingLong(e -> e));
+            return invokeAll(createCallables(maxRange, CountPrimesRunner.class.getConstructor(PrimeNumberStrategy.class, int.class, int.class)))
+                    .collect(Collectors.summingLong(e -> e));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -117,31 +140,36 @@ public class MultithreadedPrimeNumberWithSqrtFunctionCalculator extends PrimeNum
             return;
         }
         try {
-            ByteArrayOutputStream baos = invokeAll(createCallables(maxRange, WritePrimesRunner.class)).collect(ByteArrayOutputStream::new, combiner, combiner);
-            baos.writeTo(outputStream);
+            ByteArrayOutputStream test = new ByteArrayOutputStream();
+            invokeAll(createCallables(maxRange,
+                    WritePrimesRunner.class.getConstructor(PrimeNumberStrategy.class, int.class, int.class, OutputStream.class, ByteArrayOutputStream.class),
+                    outputStream, test));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private <T> List<Callable<T>> createCallables(int maxRange, Class<? extends Callable<T>> primeRunner) {
+    private <T> List<Callable<T>> createCallables(int maxRange, Constructor<? extends Callable<T>> constructor, OutputStream... output) {
         List<Callable<T>> callables = new ArrayList<>();
         int threads = maxRange / CHUNCK;
         IntStream.rangeClosed(0, threads).forEach(i -> {
-            if (i * CHUNCK < maxRange) {
-                Callable<T> callable;
+            if (i * CHUNCK <= maxRange) {
                 try {
+                    List<Object> args = new ArrayList<>();
+                    args.add(this);
+                    args.add(i * CHUNCK);
                     if (CHUNCK * (1 + i) < maxRange) {
-                        callable = (Callable<T>) primeRunner.getConstructor(PrimeNumberStrategy.class, int.class, int.class).newInstance(this, i * CHUNCK,
-                                CHUNCK * (1 + i));
+                        args.add(CHUNCK * (1 + i));
                     } else {
-                        callable = (Callable<T>) primeRunner.getConstructor(PrimeNumberStrategy.class, int.class, int.class).newInstance(this, i * CHUNCK,
-                                maxRange);
+                        args.add(maxRange);
                     }
+                    if (output.length > 0) {
+                        args.addAll(Arrays.asList(output));
+                    }
+                    callables.add((Callable<T>) constructor.newInstance(args.toArray(new Object[0])));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                callables.add(callable);
             }
         });
         return callables;

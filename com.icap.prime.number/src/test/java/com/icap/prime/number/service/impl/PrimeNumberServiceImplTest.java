@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.icap.prime.number.Application;
@@ -25,7 +25,7 @@ import com.icap.prime.number.service.PrimeNumberService;
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { Application.class })
+@SpringApplicationConfiguration(Application.class)
 public class PrimeNumberServiceImplTest {
     @Inject
     private PrimeNumberService service;
@@ -60,10 +60,20 @@ public class PrimeNumberServiceImplTest {
     }
 
     @Test
+    @Ignore
+    //tabke about 80s
     public void testFindPrimes100M() throws IOException {
         // size found on internet https://primes.utm.edu/howmany.html
         assertEquals(5761455, service.findPrimes(100000000).size());
 
+    }
+
+    @Test
+    @Ignore
+    //tabke about 80s
+    public void testFindPrimes100MWithStream() throws IOException {
+        // size found on internet https://primes.utm.edu/howmany.html
+        testWithOutputStream(100000000, 5761455);
     }
 
     @Test

@@ -16,6 +16,7 @@ import org.junit.Test;
  *
  */
 public class MultithreadedPrimeNumberWithSqrtFunctionCalculatorTest extends AbstractPrimeNumberStrategyTest {
+    private static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MultithreadedPrimeNumberWithSqrtFunctionCalculatorTest.class);
 
     @Before
     public void setUp() {
@@ -23,12 +24,21 @@ public class MultithreadedPrimeNumberWithSqrtFunctionCalculatorTest extends Abst
     }
 
     @Test
+    @Ignore
     // take about 15 s
     public void testCountPrimeFor30M() throws IOException {
         assertEquals(1857859, strategy.countPrime(30000000));
     }
 
     @Test
+    @Ignore
+    // take about 15 s
+    public void testPrimeFor30MWithStream() throws IOException {
+        testWithOutputStreamBySize(30000000, 1857859);
+    }
+
+    @Test
+    @Ignore
     // take about 15 s
     public void testPrimeFor30M() throws IOException {
         assertEquals(1857859, strategy.listPrimes(30000000).size());
@@ -43,8 +53,12 @@ public class MultithreadedPrimeNumberWithSqrtFunctionCalculatorTest extends Abst
 
     @Test
     @Ignore
+    // still too long
     public void testPrimeForMaxInteger() throws IOException {
-        assertEquals(5761455, strategy.listPrimes(Integer.MAX_VALUE).size());
+        // TODO find size and change the value
+        // assertEquals(5761455, strategy.listPrimes(Integer.MAX_VALUE).size());
+        logger.info("" + Integer.MAX_VALUE);
+        testWithOutputStreamBySize(Integer.MAX_VALUE, 5761455);
     }
 
 }

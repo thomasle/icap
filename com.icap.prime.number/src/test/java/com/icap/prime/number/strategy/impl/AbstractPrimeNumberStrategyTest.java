@@ -53,12 +53,14 @@ public abstract class AbstractPrimeNumberStrategyTest {
     protected void testWithOutputStream(int maxRange, List<Integer> expected) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         strategy.writePrimes(maxRange, baos);
-        assertEquals(expected, Arrays.stream(new String(baos.toByteArray()).split(",")).mapToInt(Integer::valueOf).boxed().collect(Collectors.toList()));
+        assertEquals(expected,
+                Arrays.stream(new String(baos.toByteArray()).split(",")).mapToInt(Integer::valueOf).sorted().boxed().collect(Collectors.toList()));
     }
 
     protected void testWithOutputStreamBySize(int maxRange, long primeCount) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         strategy.writePrimes(maxRange, baos);
-        assertEquals(primeCount, Arrays.stream(new String(baos.toByteArray()).split(",")).mapToInt(Integer::valueOf).boxed().collect(Collectors.toList()).size());
+        assertEquals(primeCount,
+                Arrays.stream(new String(baos.toByteArray()).split(",")).mapToInt(Integer::valueOf).sorted().boxed().collect(Collectors.toList()).size());
     }
 }
