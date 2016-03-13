@@ -19,43 +19,45 @@ import com.icap.prime.number.strategy.PrimeNumberStrategy;
  */
 @Component
 public class PrimeNumberStrategyDelegate implements PrimeNumberStrategy {
-	private static Map<String, PrimeNumberStrategy> strategies;
-	private static final String REDUCE = "reduce";
-	private static final String SQRT = "sqrt";
+    private static Map<String, PrimeNumberStrategy> strategies;
+    private static final String REDUCE = "reduce";
+    private static final String SQRT = "sqrt";
+    private static final String MT_SQRT = "mtsqrt";
 
-	static {
-		strategies = new HashMap<>();
-		strategies.put(REDUCE, new ReduceCandidatesStrategy());
-		strategies.put(SQRT, new PrimeNumberWithSqrtFunctionCalculator());
-	}
+    static {
+        strategies = new HashMap<>();
+        strategies.put(REDUCE, new ReduceCandidatesStrategy());
+        strategies.put(SQRT, new PrimeNumberWithSqrtFunctionCalculator());
+        strategies.put(MT_SQRT, new MultithreadedPrimeNumberWithSqrtFunctionCalculator());
+    }
 
-	@Override
-	public boolean isPrime(int n) {
-		return getStrategy(n).isPrime(n);
-	}
+    @Override
+    public boolean isPrime(int n) {
+        return getStrategy(n).isPrime(n);
+    }
 
-	@Override
-	public long countPrime(int maxRange) {
-		return getStrategy(maxRange).countPrime(maxRange);
-	}
+    @Override
+    public long countPrime(int maxRange) {
+        return getStrategy(maxRange).countPrime(maxRange);
+    }
 
-	@Override
-	public List<Integer> listPrimes(int maxRange) {
-		return getStrategy(maxRange).listPrimes(maxRange);
-	}
+    @Override
+    public List<Integer> listPrimes(int maxRange) {
+        return getStrategy(maxRange).listPrimes(maxRange);
+    }
 
-	@Override
-	public void writePrimes(int maxRange, OutputStream outputStream) throws IOException {
-		getStrategy(maxRange).writePrimes(maxRange, outputStream);
-	}
+    @Override
+    public void writePrimes(int maxRange, OutputStream outputStream) throws IOException {
+        getStrategy(maxRange).writePrimes(maxRange, outputStream);
+    }
 
-	private PrimeNumberStrategy getStrategy(int maxRange) {
-		if (maxRange <= 1000) {
-			return strategies.get(REDUCE);
-		}
-		if (maxRange <= 30000000) {
-			return strategies.get(SQRT);
-		}
-		throw new UnsupportedOperationException("strategy not yet supported");
-	}
+    private PrimeNumberStrategy getStrategy(int maxRange) {
+        if (maxRange <= 1000) {
+            return strategies.get(REDUCE);
+        }
+        if (maxRange <= 10000000) {
+            return strategies.get(SQRT);
+        }
+        return strategies.get(MT_SQRT);
+    }
 }

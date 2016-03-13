@@ -31,7 +31,7 @@ public class PrimeNumberController {
 
 	@RequestMapping(value = "/stream/{maxRange}", produces = { "application/json" })
 	String calculateAndOutputStream(@PathVariable int maxRange, HttpServletResponse response) throws IOException {
-		response.setContentType("application/json");
+        response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getOutputStream().write("{ \"maxRange\":".getBytes());
 		response.getOutputStream().write(String.valueOf(maxRange).getBytes());

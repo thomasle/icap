@@ -36,6 +36,11 @@ public abstract class AbstractPrimeNumberStrategyTest {
     }
 
     @Test
+    public void testCountPrimeFor20() throws IOException {
+        assertEquals(8, strategy.countPrime(20));
+    }
+
+    @Test
     public void testFindPrimes20() {
         assertEquals(Arrays.asList(2, 3, 5, 7, 11, 13, 17, 19), strategy.listPrimes(20));
     }
