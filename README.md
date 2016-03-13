@@ -13,6 +13,7 @@ This application calculates prime numbers from the first one (2) up to a max ran
 This will start the application with Spring Boot using an embedded Tomcat 8.
 
 4- To use the application, use your favorite browser
+
 	4.1- Using response stream output
 	http://localhost:8080/stream/<maxRange> where <maxRange> should be replaced by a positive integer.
 This url would write the list of prime numbers directly into the output stream.
