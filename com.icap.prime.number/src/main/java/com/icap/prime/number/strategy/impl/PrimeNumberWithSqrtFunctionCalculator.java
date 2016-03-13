@@ -33,7 +33,7 @@ public class PrimeNumberWithSqrtFunctionCalculator implements PrimeNumberStrateg
 
 	@Override
 	public void writePrimes(int maxRange, OutputStream outputStream) throws IOException {
-		ByteArrayOutputStream baos = IntStream.rangeClosed(2, maxRange).parallel().filter(this::isPrime).sorted()
+		ByteArrayOutputStream baos = IntStream.rangeClosed(2, maxRange).parallel().filter(this::isPrime).sorted().sequential()
 				.collect(ByteArrayOutputStream::new, (s, i) -> {
 					try {
 						if (s.toByteArray().length > 0) {
@@ -53,7 +53,7 @@ public class PrimeNumberWithSqrtFunctionCalculator implements PrimeNumberStrateg
 						logger.error(String.format("can't merge %s and %s to stream", s1, s2), e);
 					}
 				});
-		outputStream.write(baos.toByteArray());
+		baos.writeTo(outputStream);
 	}
 
 	@Override
