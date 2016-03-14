@@ -16,12 +16,16 @@ import com.icap.prime.number.strategy.PrimeNumberStrategy;
 /**
  * @author thomas
  *
+ *         This implementation uses a math function to calculate prime numbers.
+ *         This does not need a previously calculated prime numbers, hence the method
+ *         {@link PrimeNumberStrategy.writePrimes} is more efficient than {@link ReduceCandidatesStrategy}
+ *         implementation. This is good for integer medium big < 10M.
  */
 public class PrimeNumberWithSqrtFunctionCalculator implements PrimeNumberStrategy {
     private static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PrimeNumberWithSqrtFunctionCalculator.class);
 
     @Override
-    public long countPrime(int maxRange) {
+    public long countPrimes(int maxRange) {
         return IntStream.rangeClosed(1, maxRange).parallel().filter(this::isPrime).count();
     }
 

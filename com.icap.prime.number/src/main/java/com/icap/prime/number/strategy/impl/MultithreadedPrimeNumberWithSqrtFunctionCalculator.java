@@ -23,6 +23,11 @@ import com.icap.prime.number.strategy.PrimeNumberStrategy;
 /**
  * @author thomas
  *
+ *         This implementation uses the same strategy as
+ *         {@link PrimeNumberWithSqrtFunctionCalculator} except it uses an
+ *         executor service to spwan threads. This is good for integer medium
+ *         big < 100M (Around 80s to calculate all prime number with a max range
+ *         of 100M)
  */
 public class MultithreadedPrimeNumberWithSqrtFunctionCalculator extends PrimeNumberWithSqrtFunctionCalculator {
     private static org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MultithreadedPrimeNumberWithSqrtFunctionCalculator.class);
@@ -121,9 +126,9 @@ public class MultithreadedPrimeNumberWithSqrtFunctionCalculator extends PrimeNum
     }
 
     @Override
-    public long countPrime(int maxRange) {
+    public long countPrimes(int maxRange) {
         if (maxRange <= CHUNCK) {
-            return super.countPrime(maxRange);
+            return super.countPrimes(maxRange);
         }
         try {
             return invokeAll(createCallables(maxRange, CountPrimesRunner.class.getConstructor(PrimeNumberStrategy.class, int.class, int.class)))

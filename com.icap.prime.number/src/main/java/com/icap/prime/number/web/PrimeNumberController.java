@@ -18,28 +18,35 @@ import com.icap.prime.number.service.PrimeNumberService;
 /**
  * @author thomas
  *
+ *         Entrypoint of the REST service
  */
 @RestController
 public class PrimeNumberController {
-	@Inject
-	private PrimeNumberService service;
+    @Inject
+    private PrimeNumberService service;
 
-	@RequestMapping(value = "/{maxRange}", produces = { "application/json" })
-	PrimeNumberResponse calculate(@PathVariable int maxRange) {
-		return new PrimeNumberResponse(maxRange, service.findPrimes(maxRange));
-	}
+    /**
+     * entry point using implementation for array list storing the prime numbers
+     */
+    @RequestMapping(value = "/{maxRange}", produces = { "application/json" })
+    PrimeNumberResponse calculate(@PathVariable int maxRange) {
+        return new PrimeNumberResponse(maxRange, service.findPrimes(maxRange));
+    }
 
-	@RequestMapping(value = "/stream/{maxRange}", produces = { "application/json" })
-	String calculateAndOutputStream(@PathVariable int maxRange, HttpServletResponse response) throws IOException {
+    /**
+     * entry point for output stream 
+     */
+    @RequestMapping(value = "/stream/{maxRange}", produces = { "application/json" })
+    String calculateAndOutputStream(@PathVariable int maxRange, HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getOutputStream().write("{ \"maxRange\":".getBytes());
-		response.getOutputStream().write(String.valueOf(maxRange).getBytes());
-		response.getOutputStream().write(", \"primes\":[".getBytes());
-		service.findPrimes(maxRange, response.getOutputStream());
-		response.getOutputStream().write("] }".getBytes());
-		response.getOutputStream().flush();
-		response.setStatus(HttpServletResponse.SC_ACCEPTED);
-		return "";
-	}
+        response.setCharacterEncoding("UTF-8");
+        response.getOutputStream().write("{ \"maxRange\":".getBytes());
+        response.getOutputStream().write(String.valueOf(maxRange).getBytes());
+        response.getOutputStream().write(", \"primes\":[".getBytes());
+        service.findPrimes(maxRange, response.getOutputStream());
+        response.getOutputStream().write("] }".getBytes());
+        response.getOutputStream().flush();
+        response.setStatus(HttpServletResponse.SC_ACCEPTED);
+        return "";
+    }
 }

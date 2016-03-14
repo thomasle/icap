@@ -27,7 +27,7 @@ public class MultithreadedPrimeNumberWithSqrtFunctionCalculatorTest extends Abst
     @Ignore
     // take about 15 s
     public void testCountPrimeFor30M() throws IOException {
-        assertEquals(1857859, strategy.countPrime(30000000));
+        assertEquals(1857859, strategy.countPrimes(30000000));
     }
 
     @Test

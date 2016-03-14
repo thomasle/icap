@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 /**
  * 
  * @author thomas
- *
+ * 
+ *         Aspect Logger to capture all exceptions from services. This helps not
+ *         to miss exception and to log them
  */
 @Aspect
 @Service("service.exception.logger")

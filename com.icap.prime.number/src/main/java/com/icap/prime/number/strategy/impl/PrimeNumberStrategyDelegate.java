@@ -16,6 +16,7 @@ import com.icap.prime.number.strategy.PrimeNumberStrategy;
 /**
  * @author thomas
  *
+ *         This is a delegator for prime number calculator strategy
  */
 @Component
 public class PrimeNumberStrategyDelegate implements PrimeNumberStrategy {
@@ -37,8 +38,8 @@ public class PrimeNumberStrategyDelegate implements PrimeNumberStrategy {
     }
 
     @Override
-    public long countPrime(int maxRange) {
-        return getStrategy(maxRange).countPrime(maxRange);
+    public long countPrimes(int maxRange) {
+        return getStrategy(maxRange).countPrimes(maxRange);
     }
 
     @Override
